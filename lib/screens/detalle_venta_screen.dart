@@ -354,8 +354,6 @@ class _DetalleVentaScreenState extends State<DetalleVentaScreen> {
   }
 }
  
-// ── Widgets auxiliares ───────────────────────────────────────────────────────
- 
 class _InfoTile extends StatelessWidget {
   final IconData icon; final String label, value; final Color color;
   const _InfoTile({required this.icon, required this.label,

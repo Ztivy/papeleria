@@ -118,7 +118,6 @@ class PapeleriaDB {
     }
   }
 
-  // ==================== CATEGORIAS ====================
   Future<int> insertCategoria(Categoria cat) async {
     final db = await database;
     return db.insert('tblCategoria', cat.toMap()..remove('idCategoria'));
@@ -145,7 +144,6 @@ class PapeleriaDB {
     return res.map((e) => Categoria.fromMap(e)).toList();
   }
 
-  // ==================== PRODUCTOS ====================
   Future<int> insertProducto(Producto prod) async {
     final db = await database;
     return db.insert('tblProducto', prod.toMap()..remove('idProducto'));
@@ -176,7 +174,6 @@ class PapeleriaDB {
     return res.map((e) => Producto.fromMap(e)).toList();
   }
 
-  // ==================== VENTAS ====================
   Future<int> insertVenta(Venta venta) async {
     final db = await database;
     return db.insert('tblVenta', venta.toMap()..remove('idVenta'));
@@ -252,7 +249,6 @@ class PapeleriaDB {
         where: 'idVenta=?', whereArgs: [idVenta]);
   }
 
-  // ==================== DETALLE VENTA ====================
   Future<int> insertDetalle(DetalleVenta detalle) async {
     final db = await database;
     return db.insert('tblDetalleVenta', detalle.toMap()..remove('idDetalle'));

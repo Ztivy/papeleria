@@ -1,5 +1,3 @@
-
-// Estatus: 0=En proceso, 1=Completada, 2=Cancelada
 import 'package:bdp/models/producto_model.dart';
 
 class Venta {

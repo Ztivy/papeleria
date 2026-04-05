@@ -1,4 +1,3 @@
-// lib/models/categoria_model.dart
 class Categoria {
   int? idCategoria;
   String nombre;

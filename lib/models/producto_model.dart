@@ -1,4 +1,3 @@
-// lib/models/producto_model.dart
 class Producto {
   int? idProducto;
   String nombre;

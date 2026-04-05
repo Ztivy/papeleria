@@ -17,9 +17,7 @@ class HomeScreen extends StatefulWidget {
  
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
- 
-  // ✅ Claves globales: al cambiar la key Flutter destruye y recrea el widget
-  // forzando que cargue datos frescos de la BD
+
   GlobalKey _ventasKey   = GlobalKey();
   GlobalKey _calendarioKey = GlobalKey();
   GlobalKey _catalogoKey   = GlobalKey();
@@ -34,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
  
-  // ✅ Método para forzar recarga de todas las pantallas
   void _refrescarTodo() {
     setState(() {
       _ventasKey    = GlobalKey();
@@ -45,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
  
   Future<void> _irANuevaVenta() async {
     await Navigator.pushNamed(context, '/nueva-venta');
-    // ✅ Al regresar de nueva venta, reconstruir todas las pantallas
     _refrescarTodo();
   }
  

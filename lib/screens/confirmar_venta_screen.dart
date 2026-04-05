@@ -40,7 +40,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
       body: CustomScrollView(
         slivers: [
  
-          // ── Datos del cliente ──────────────────────────────────────────
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -88,7 +87,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
             ),
           ),
  
-          // ── Título productos ───────────────────────────────────────────
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             sliver: SliverToBoxAdapter(
@@ -103,7 +101,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
             ),
           ),
  
-          // ── Lista de productos ─────────────────────────────────────────
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList(
@@ -148,7 +145,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
             ),
           ),
  
-          // ── Total ──────────────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Container(
               margin: const EdgeInsets.all(16),
@@ -174,7 +170,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
         ],
       ),
  
-      // ── Botón confirmar ────────────────────────────────────────────────
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -245,7 +240,6 @@ class _ConfirmarVentaScreenState extends State<ConfirmarVentaScreen> {
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ));
-        // Regresamos true para que NuevaVentaScreen sepa que se guardó
         Navigator.pop(context, true);
       }
     } catch (e) {

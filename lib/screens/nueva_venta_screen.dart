@@ -94,7 +94,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
     );
   }
  
-  // ── STEP 0: Cliente ──────────────────────────────────────────────────────
  
   Widget _buildCliente() => SingleChildScrollView(
     key: const ValueKey(0),
@@ -141,7 +140,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
     ]),
   );
  
-  // ── STEP 1: Categorías ───────────────────────────────────────────────────
  
   Widget _buildCategorias() => Column(
     key: const ValueKey(1),
@@ -198,8 +196,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
       ),
     ],
   );
- 
-  // ── STEP 2: Productos ────────────────────────────────────────────────────
  
   Widget _buildProductos() => Column(
     key: const ValueKey(2),
@@ -313,8 +309,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
     ],
   );
  
-  // ── Bottom bar ───────────────────────────────────────────────────────────
- 
   Widget _buildBottomBar(CarritoProvider carrito) => Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
@@ -359,7 +353,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
     ),
   );
  
-  // ── Lógica de navegación ─────────────────────────────────────────────────
  
   void _siguiente(CarritoProvider carrito) {
     if (_step == 0) {
@@ -371,7 +364,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
       if (_catSel == null) { _snackError('Selecciona una categoría'); return; }
       setState(() => _step = 2);
     } else {
-      // Paso 2 → ir a pantalla de confirmación/resumen
       if (carrito.items.isEmpty) {
         _snackError('Agrega al menos un producto'); return;
       }
@@ -391,7 +383,6 @@ class _NuevaVentaScreenState extends State<NuevaVentaScreen> {
         ),
       ),
     ).then((guardado) {
-      // Si la venta se guardó, regresamos a la pantalla principal
       if (guardado == true && mounted) {
         Navigator.pop(context);
       }
