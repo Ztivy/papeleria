@@ -11,23 +11,22 @@ class CalendarioScreen extends StatefulWidget {
   State<CalendarioScreen> createState() => _CalendarioScreenState();
 }
  
-class _CalendarioScreenState extends State<CalendarioScreen>
-    with AutomaticKeepAliveClientMixin {
-  final PapeleriaDB _db = PapeleriaDB();
+class _CalendarioScreenState extends State<CalendarioScreen> {
+  final PapeleriaDB _db     = PapeleriaDB();
   Map<DateTime, List<Venta>> _eventos = {};
-  DateTime _focusedDay  = DateTime.now();
+  DateTime _focusedDay      = DateTime.now();
   DateTime? _selectedDay;
-  CalendarFormat _format = CalendarFormat.month;
+  CalendarFormat _format    = CalendarFormat.month;
  
   @override
-  bool get wantKeepAlive => true;
- 
-  @override
-  void initState() { super.initState(); _cargarEventos(); }
+  void initState() {
+    super.initState();
+    _cargarEventos();
+  }
  
   Future<void> _cargarEventos() async {
     final eventos = await _db.getVentasParaCalendario();
-    setState(() => _eventos = eventos);
+    if (mounted) setState(() => _eventos = eventos);
   }
  
   List<Venta> _getEventos(DateTime day) =>
@@ -35,7 +34,6 @@ class _CalendarioScreenState extends State<CalendarioScreen>
  
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return RefreshIndicator(
       onRefresh: _cargarEventos,
       color: AppTheme.primary,
@@ -47,10 +45,9 @@ class _CalendarioScreenState extends State<CalendarioScreen>
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.06),
-                      blurRadius: 12, offset: const Offset(0, 4))
-                ],
+                boxShadow: [BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 12, offset: const Offset(0, 4))],
               ),
               child: TableCalendar<Venta>(
                 firstDay: DateTime.utc(2024, 1, 1),
@@ -65,18 +62,17 @@ class _CalendarioScreenState extends State<CalendarioScreen>
                     _selectedDay = selected;
                     _focusedDay  = focused;
                   });
-                  final eventos = _getEventos(selected);
-                  if (eventos.isNotEmpty) _mostrarModalDia(selected, eventos);
+                  final ev = _getEventos(selected);
+                  if (ev.isNotEmpty) _mostrarModal(selected, ev);
                 },
                 onPageChanged: (f) => setState(() => _focusedDay = f),
                 calendarStyle: CalendarStyle(
                   outsideDaysVisible: false,
                   todayDecoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.3),
-                    shape: BoxShape.circle,
-                  ),
+                      color: AppTheme.primary.withOpacity(0.3),
+                      shape: BoxShape.circle),
                   selectedDecoration: const BoxDecoration(
-                    color: AppTheme.primary, shape: BoxShape.circle),
+                      color: AppTheme.primary, shape: BoxShape.circle),
                 ),
                 headerStyle: const HeaderStyle(
                   formatButtonDecoration: BoxDecoration(
@@ -96,16 +92,14 @@ class _CalendarioScreenState extends State<CalendarioScreen>
                       bottom: 1,
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: events.take(3).map((e) {
-                          return Container(
-                            width: 6, height: 6,
-                            margin: const EdgeInsets.symmetric(horizontal: 1),
-                            decoration: BoxDecoration(
-                              color: AppTheme.getStatusColor(e.estatus),
-                              shape: BoxShape.circle,
-                            ),
-                          );
-                        }).toList(),
+                        children: events.take(4).map((e) => Container(
+                          width: 6, height: 6,
+                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                          decoration: BoxDecoration(
+                            color: AppTheme.getStatusColor(e.estatus),
+                            shape: BoxShape.circle,
+                          ),
+                        )).toList(),
                       ),
                     );
                   },
@@ -117,25 +111,42 @@ class _CalendarioScreenState extends State<CalendarioScreen>
           // Leyenda
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  _LegendDot(color: AppTheme.statusEnProceso,  label: 'En proceso'),
-                  SizedBox(width: 16),
-                  _LegendDot(color: AppTheme.statusCancelada,  label: 'Cancelado'),
-                  SizedBox(width: 16),
-                  _LegendDot(color: AppTheme.statusCompletada, label: 'Completado'),
-                ],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(mainAxisAlignment: MainAxisAlignment.center, children: const [
+                _LegendDot(color: AppTheme.statusEnProceso,  label: 'En proceso'),
+                SizedBox(width: 16),
+                _LegendDot(color: AppTheme.statusCancelada,  label: 'Cancelado'),
+                SizedBox(width: 16),
+                _LegendDot(color: AppTheme.statusCompletada, label: 'Completado'),
+              ]),
             ),
           ),
  
-          // Preview del día seleccionado
-          if (_selectedDay != null &&
-              _getEventos(_selectedDay!).isNotEmpty)
+          // Preview día seleccionado
+          if (_selectedDay != null && _getEventos(_selectedDay!).isNotEmpty)
             SliverToBoxAdapter(
-              child: _buildPreviewDia(),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Row(children: [
+                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(DateFormat('dd/MM/yyyy').format(_selectedDay!),
+                        style: const TextStyle(fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textMid)),
+                    Text('${_getEventos(_selectedDay!).length} pedido(s)',
+                        style: const TextStyle(fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textDark)),
+                  ]),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () =>
+                        _mostrarModal(_selectedDay!, _getEventos(_selectedDay!)),
+                    icon: const Icon(Icons.visibility_rounded, size: 16),
+                    label: const Text('Ver todos'),
+                  ),
+                ]),
+              ),
             ),
  
           const SliverToBoxAdapter(child: SizedBox(height: 20)),
@@ -144,24 +155,7 @@ class _CalendarioScreenState extends State<CalendarioScreen>
     );
   }
  
-  Widget _buildPreviewDia() {
-    final eventos = _getEventos(_selectedDay!);
-    final fmt = DateFormat('dd/MM/yyyy');
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text(fmt.format(_selectedDay!).toUpperCase(),
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700,
-                color: AppTheme.textMid, letterSpacing: 1.2)),
-        const SizedBox(height: 4),
-        Text('${eventos.length} pedido(s)',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
-                color: AppTheme.textDark)),
-      ]),
-    );
-  }
- 
-  void _mostrarModalDia(DateTime dia, List<Venta> ventas) {
+  void _mostrarModal(DateTime dia, List<Venta> ventas) {
     final fmt = DateFormat('dd/MM/yyyy');
     showModalBottomSheet(
       context: context,
@@ -178,7 +172,6 @@ class _CalendarioScreenState extends State<CalendarioScreen>
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(children: [
-            // Handle
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40, height: 4,
@@ -188,14 +181,22 @@ class _CalendarioScreenState extends State<CalendarioScreen>
             ),
             Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(fmt.format(dia).toUpperCase(),
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-                        color: AppTheme.textMid, letterSpacing: 1)),
-                const SizedBox(height: 4),
-                Text('${ventas.length} pedido(s) para este día',
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700,
-                        color: AppTheme.textDark)),
+              child: Row(children: [
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(fmt.format(dia),
+                      style: const TextStyle(fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textMid)),
+                  Text('${ventas.length} pedido(s)',
+                      style: const TextStyle(fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.textDark)),
+                ]),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
               ]),
             ),
             const Divider(height: 1),
@@ -204,17 +205,15 @@ class _CalendarioScreenState extends State<CalendarioScreen>
                 controller: controller,
                 padding: const EdgeInsets.all(16),
                 itemCount: ventas.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, i) {
-                  final v = ventas[i];
+                  final v  = ventas[i];
                   final sc = AppTheme.getStatusColor(v.estatus);
                   return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                    child: Padding(padding: const EdgeInsets.all(14),
                       child: Row(children: [
-                        Container(width: 6, height: 60,
-                            decoration: BoxDecoration(
-                                color: sc,
+                        Container(width: 5, height: 56,
+                            decoration: BoxDecoration(color: sc,
                                 borderRadius: BorderRadius.circular(3))),
                         const SizedBox(width: 12),
                         Expanded(child: Column(
@@ -223,29 +222,27 @@ class _CalendarioScreenState extends State<CalendarioScreen>
                             Text(v.clienteNombre,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w700, fontSize: 15)),
-                            const SizedBox(height: 4),
                             Row(children: [
                               const Icon(Icons.phone_rounded,
-                                  size: 13, color: AppTheme.textMid),
+                                  size: 12, color: AppTheme.textMid),
                               const SizedBox(width: 4),
                               Text(v.clienteTelefono,
                                   style: const TextStyle(
                                       fontSize: 12, color: AppTheme.textMid)),
                             ]),
                             if (v.notas != null && v.notas!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(v.notas!,
-                                    style: const TextStyle(
-                                        fontSize: 11, color: AppTheme.textLight),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis),
-                              ),
+                              Text(v.notas!,
+                                  style: const TextStyle(
+                                      fontSize: 11, color: AppTheme.textLight),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis),
                           ],
                         )),
-                        Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+                        Column(crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
                           Text('\$${v.total.toStringAsFixed(2)}',
-                              style: const TextStyle(fontWeight: FontWeight.w700,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
                                   fontSize: 15, color: AppTheme.primary)),
                           const SizedBox(height: 4),
                           Container(
@@ -277,14 +274,12 @@ class _LegendDot extends StatelessWidget {
   final Color color; final String label;
   const _LegendDot({required this.color, required this.label});
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
+  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min,
     children: [
       Container(width: 10, height: 10,
           decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
       const SizedBox(width: 4),
-      Text(label,
-          style: const TextStyle(fontSize: 11, color: AppTheme.textMid)),
+      Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textMid)),
     ],
   );
 }
