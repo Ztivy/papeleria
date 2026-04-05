@@ -11,39 +11,48 @@ import 'package:bdp/screens/categorias_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
-
+ 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
-  final List<Widget> _screens = const [
-    VentasListScreen(),
-    CalendarioScreen(),
-    CategoriasScreen(),
-  ];
-
-  final List<String> _titles = [
-    'Mis Pedidos',
-    'Calendario',
-    'Catálogo',
-  ];
-
+ 
+  // ✅ Claves globales: al cambiar la key Flutter destruye y recrea el widget
+  // forzando que cargue datos frescos de la BD
+  GlobalKey _ventasKey   = GlobalKey();
+  GlobalKey _calendarioKey = GlobalKey();
+  GlobalKey _catalogoKey   = GlobalKey();
+ 
+  final List<String> _titles = ['Mis Pedidos', 'Calendario', 'Catálogo'];
+ 
   @override
   void initState() {
     super.initState();
-    // Check notifications after frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       NotificationService.verificarYNotificar();
     });
   }
-
+ 
+  // ✅ Método para forzar recarga de todas las pantallas
+  void _refrescarTodo() {
+    setState(() {
+      _ventasKey    = GlobalKey();
+      _calendarioKey = GlobalKey();
+      _catalogoKey   = GlobalKey();
+    });
+  }
+ 
+  Future<void> _irANuevaVenta() async {
+    await Navigator.pushNamed(context, '/nueva-venta');
+    // ✅ Al regresar de nueva venta, reconstruir todas las pantallas
+    _refrescarTodo();
+  }
+ 
   @override
   Widget build(BuildContext context) {
     final carrito = context.watch<CarritoProvider>();
-
+ 
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -70,20 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             child: IconButton(
               icon: const Icon(Icons.shopping_cart_rounded),
-              onPressed: () => Navigator.pushNamed(context, '/carrito'),
+              onPressed: _irANuevaVenta,
             ),
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
+      body: _buildCurrentScreen(),
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton.extended(
-              onPressed: () => Navigator.pushNamed(context, '/nueva-venta')
-                  .then((_) => setState(() {})),
+              onPressed: _irANuevaVenta,
               icon: const Icon(Icons.add_shopping_cart_rounded),
               label: const Text('Nueva Venta',
                   style: TextStyle(fontWeight: FontWeight.w600)),
@@ -97,14 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long_rounded,
-                color: AppTheme.primary),
+            selectedIcon:
+                Icon(Icons.receipt_long_rounded, color: AppTheme.primary),
             label: 'Pedidos',
           ),
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined),
-            selectedIcon: Icon(Icons.calendar_month_rounded,
-                color: AppTheme.primary),
+            selectedIcon:
+                Icon(Icons.calendar_month_rounded, color: AppTheme.primary),
             label: 'Calendario',
           ),
           NavigationDestination(
@@ -116,5 +121,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+ 
+  Widget _buildCurrentScreen() {
+    switch (_currentIndex) {
+      case 0:
+        return VentasListScreen(key: _ventasKey);
+      case 1:
+        return CalendarioScreen(key: _calendarioKey);
+      case 2:
+        return CategoriasScreen(key: _catalogoKey);
+      default:
+        return VentasListScreen(key: _ventasKey);
+    }
   }
 }
